@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게시글 및 댓글 관리</title>
+</head>
+<body>
+    <h1>게시글 관리</h1>
+    
+    <h2>게시글 작성</h2>
+    <input type="text" id="postTitle" placeholder="제목">
+    <input type="text" id="postAuthor" placeholder="작성자">
+    <input type="password" id="postPassword" placeholder="비밀번호">
+    <textarea id="postContent" placeholder="내용"></textarea>
+    <button onclick="createPost()">게시글 작성</button>
+
+    <h2>게시글 목록</h2>
+    <ul id="postList"></ul>
+
+    <h2>댓글 작성</h2>
+    <input type="text" id="commentAuthor" placeholder="작성자">
+    <input type="password" id="commentPassword" placeholder="비밀번호">
+    <textarea id="commentContent" placeholder="내용"></textarea>
+    <input type="text" id="commentPostId" placeholder="게시글 ID">
+    <button onclick="createComment()">댓글 작성</button>
+
+    <script>
+        async function fetchPosts() {
+            const response = await fetch('/api/posts');
+            const data = await response.json();
+            const postList = document.getElementById('postList');
+            postList.innerHTML = ''; // 이전 목록 초기화
+
+            data.posts.forEach(post => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <strong>${post.title}</strong> - ${post.author}
+                    <button onclick="editPost('${post.postId}')">수정</button>
+                    <button onclick="deletePost('${post.postId}')">삭제</button>
+                    <ul id="commentList-${post.postId}"></ul>
+                    <h4>댓글 목록</h4>
+                    <button onclick="fetchComments('${post.postId}')">댓글 보기</button>
+                `;
+                postList.appendChild(li);
+            });
+        }
+
+        async function createPost() {
+            const title = document.getElementById('postTitle').value;
+            const author = document.getElementById('postAuthor').value;
+            const password = document.getElementById('postPassword').value;
+            const content = document.getElementById('postContent').value;
+
+            const response = await fetch('/api/posts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, author, password, content })
+            });
+            await response.json();
+            fetchPosts(); // 목록 갱신
+        }
+
+        async function editPost(postId) {
+            const password = prompt("비밀번호를 입력하세요:");
+            const title = prompt("새 제목을 입력하세요:");
+            const content = prompt("새 내용을 입력하세요:");
+
+            const response = await fetch(`/api/posts/${postId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password, title, content })
+            });
+            await response.json();
+            fetchPosts(); // 목록 갱신
+        }
+
+        async function deletePost(postId) {
+            const password = prompt("비밀번호를 입력하세요:");
+
+            const response = await fetch(`/api/posts/${postId}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password })
+            });
+            await response.json();
+            fetchPosts(); // 목록 갱신
+        }
+
+        async function fetchComments(postId) {
+            const response = await fetch(`/api/posts/${postId}/comments`);
+            const data = await response.json();
+            const commentList = document.getElementById(`commentList-${postId}`);
+            commentList.innerHTML = ''; // 이전 목록 초기화
+
+            data.comments.forEach(comment => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <strong>${comment.author}</strong>: ${comment.content}
+                    <button onclick="editComment('${comment._id}', '${postId}')">수정</button>
+                    <button onclick="deleteComment('${comment._id}', '${postId}')">삭제</button>
+                `;
+                commentList.appendChild(li);
+            });
+        }
+
+        async function createComment() {
+            const author = document.getElementById('commentAuthor').value;
+            const password = document.getElementById('commentPassword').value;
+            const content = document.getElementById('commentContent').value;
+            const postId = document.getElementById('commentPostId').value;
+
+            const response = await fetch(`/api/posts/${postId}/comments`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ author, password, content })
+            });
+            await response.json();
+            fetchComments(postId); // 댓글 목록 갱신
+        }
+
+        async function editComment(commentId, postId) {
+            const password = prompt("비밀번호를 입력하세요:");
+            const content = prompt("새 댓글 내용을 입력하세요:");
+
+            const response = await fetch(`/api/posts/${postId}/comments/${commentId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password, content })
+            });
+            await response.json();
+            fetchComments(postId); // 댓글 목록 갱신
+        }
+
+        async function deleteComment(commentId, postId) {
+            const password = prompt("비밀번호를 입력하세요:");
+
+            const response = await fetch(`/api/posts/${postId}/comments/${commentId}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password })
+            });
+            await response.json();
+            fetchComments(postId); // 댓글 목록 갱신
+        }
+
+        // 페이지가 로드될 때 게시글을 가져옵니다.
+        fetchPosts();
+    </script>
+</body>
+</html>
