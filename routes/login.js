@@ -2,7 +2,7 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const router = express.Router();
 
-const User = require("../schemas/user");
+const User = require("../schemas/login");
 
 router.post("/signup", async (req, res) => {
     const { nickname, password, confirmPassword } = req.body;
