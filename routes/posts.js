@@ -60,7 +60,7 @@ router.delete("/posts/:postId", async (req, res) => {
     throw new Error("비밀번호가 올바르지 않습니다.");
   }
 
-  await post.delete();
+  await post.deleteOne();
   res.send({});
 });
 

@@ -3,14 +3,14 @@ const router = express.Router();
 
 const Comment = require("../schemas/comment");
 
-router.get("/post/:postId/comments", async (req, res) => {
+router.get("/post/:postId/comment", async (req, res) => {
     const { postId } = req.params;
 
     const comments = await Comment.find({ postId }).sort({ createdAt:-1 }).exec();
     res.send({ comments });
 });
 
-router.post("/post/:postId/comments", async (req, res) => {
+router.post("/post/:postId/comment", async (req, res) => {
     const { postId } = req.params;
     const { author, content, password } = req.body;
 
@@ -23,7 +23,7 @@ router.post("/post/:postId/comments", async (req, res) => {
     res.send({ comment });
 });
 
-router.patch("/posts/:postId/comments/:commentId", async (req, res) => {
+router.patch("/post/:postId/comment/:commentId", async (req, res) => {
     const { commentId } = req.params;
     const { content, password } = req.body;
 
@@ -43,7 +43,7 @@ router.patch("/posts/:postId/comments/:commentId", async (req, res) => {
     res.send({});
 });
 
-router.delete("/posts/:postId/comments/:commentId", async (req, res) => {
+router.delete("/post/:postId/comment/:commentId", async (req, res) => {
   const { commentId } = req.params;
   const { password } = req.body;
 
@@ -55,7 +55,7 @@ router.delete("/posts/:postId/comments/:commentId", async (req, res) => {
     throw new Error("비밀번호가 올바르지 않습니다.");
   }
 
-  await comment.delete();
+  await comment.deleteOne();
   res.send({});
 });
 

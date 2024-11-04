@@ -8,7 +8,6 @@ const app = express();
 
 app.use(express.json());
 app.use('/', mainRouter);
-app.use('/login', require("./routes/login"));
 app.use(express.static("./assets"));
 
 app.listen(8080, () => {
