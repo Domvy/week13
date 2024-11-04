@@ -13,3 +13,7 @@ app.use(express.static("./assets"));
 app.listen(8080, () => {
   console.log("서버가 켜졌어요!");
 });
+
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/assets/home.html');
+});
